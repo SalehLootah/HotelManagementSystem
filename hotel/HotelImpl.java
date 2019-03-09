@@ -1,21 +1,141 @@
 package hotel;
 
+import java.io.*;
+import java.util.ArrayList;
 import java.time.LocalDate;
+import java.util.Date;
+import java.util.Random;
+import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
+import java.text.*;
 
 /**
  *
  * @author Anas Albaadry & Saleh Lootah
  */
 public class HotelImpl implements Hotel{
+    public static ArrayList<Room>rooms;
+    public static ArrayList<Guest>guests;
+    public static ArrayList<Booking>bookings;
+    public static ArrayList<Payment>payments;
+    public static ArrayList<VIP>VIPGuests;
+    public static final SimpleDateFormat d8 = new SimpleDateFormat("yyyy-MM-dd");
+    
+    static class Room{
+        private long roomNumber;
+        private String roomType;
+        private double price;
+        private int capacity;
+        private String facilities;
+        
+        //Constructor Start
+        public Room(long roomNumber, String roomType, double price, int capacity, String facilities){
+            this.roomNumber = roomNumber;
+            this.roomType = roomType;
+            this.price = price;
+            this.capacity = capacity;
+            this.facilities = facilities;
+        }
+        
+    }
+    
+    static class Guest{
+        private long guestID;
+        private String fName;
+        private String lName;
+        private Date dateJoin;
+        
+        public Guest(long guestID,String fName,String lName,Date dateJoin){
+            this.guestID = guestID;
+            this.fName = fName;
+            this.lName = lName;
+            this.dateJoin = dateJoin;
+        }
+    }
+    
+    static class Booking{
+        private long id;
+        private long guestID;
+        private long roomNumber;
+        private Date bookingDate;
+        private Date checkinDate;
+        private Date checkoutDate;
+        
+        public Booking(long id,long guestID,long roomNumber,Date bookingDate,Date checkinDate, Date checkoutDate){
+            this.id = id;
+            this.guestID = guestID;
+            this.roomNumber = roomNumber;
+            this.bookingDate = bookingDate;
+            this.checkinDate = checkinDate;
+            this.checkoutDate = checkoutDate;
+        }
+    }
+    
+    static class Payment{
+        private Date date;
+        private long guestID;
+        private double amount;
+        private String payReason;
+        
+        public Payment(Date date, long guestID, double amount, String payReason){
+            this.date = date;
+            this.guestID = guestID;
+            this.amount = amount;
+            this.payReason = payReason;
+        }
+    }
+    
+    class VIP extends Guest{
+        private Date VIPStartDate;
+        private Date VIPEndData;
+        
+        public VIP(long guestID, String fName, String lName, Date dateJoin, Date VIPstartDate, Date VIPEndDate) {
+            super(guestID, fName, lName, dateJoin);
+            this.VIPStartDate = VIPStartDate;
+            this.VIPEndData = VIPEndDate;
+        }
+        
+        public void setVIP(Date VIPStartDate, Date VIPEndDate){
+            this.VIPEndData = VIPEndDate;
+            this.VIPStartDate = VIPStartDate;
+        }
+        
+        public Date getVIPStartDate(){
+            return this.VIPStartDate = VIPStartDate;
+        }
+        public Date getVIPEndDate(){
+            return this.VIPEndData = VIPEndData;
+        }
+    
+    }
+    
     /**
     * Load all the room records from a text file
     *
     * @param  roomsTxtFileName  the text file for all room records
     * @return true if loading data successfully, otherwise false
     */
-    @Override
+    
     public boolean importRoomsData(String roomsTxtFileName) {
-        return true;
+        try{
+            File file = new File(roomsTxtFileName);
+            BufferedReader in = new BufferedReader(new FileReader(file));
+            String st;
+            rooms = new ArrayList<Room>();
+
+            while ((st = in.readLine()) != null){
+                String[] roomData = st.split(",");
+                Room newRoom = new Room(Long.valueOf(roomData[0]),roomData[1],Double.valueOf(roomData[2]),Integer.valueOf(roomData[3]), roomData[4]);
+                rooms.add(newRoom);
+            }
+            in.close();
+            return true;
+        }
+        catch(Exception e){
+            System.out.println("ERORR");
+            return false;
+        }
+        
     }
     
     /**
@@ -24,9 +144,32 @@ public class HotelImpl implements Hotel{
     * @param  guestsTxtFileName  the text file for all guest records
     * @return true if loading data successfully, otherwise false
     */
-    @Override
+    
     public boolean importGuestsData(String guestsTxtFileName) {
-        return true;
+        try{
+        File file = new File(guestsTxtFileName);
+            BufferedReader in = new BufferedReader(new FileReader(file));
+            String st;
+            guests = new ArrayList<Guest>();
+            VIPGuests = new ArrayList<VIP>();
+            while((st = in.readLine()) != null){
+                String[] guestData = st.split(",");
+                if(guestData.length > 4){
+                    VIP newVIPGuest = new VIP(Long.valueOf(guestData[0]),guestData[1],guestData[2],d8.parse(guestData[3]),d8.parse(guestData[4]),d8.parse(guestData[5]));
+                    VIPGuests.add(newVIPGuest);
+                }
+                else{
+                    Guest newGuest = new Guest(Long.valueOf(guestData[0]),guestData[1],guestData[2],d8.parse(guestData[3]));
+                    guests.add(newGuest);
+                }
+            }
+            in.close();
+            return true;
+        }
+        catch(Exception e){
+            System.out.println("Error while reading guest list");
+            return false;
+        }  
     }
     
     /**
@@ -35,7 +178,7 @@ public class HotelImpl implements Hotel{
     * @param  bookingsTxtFileName  the text file for all booking records
     * @return true if loading data successfully, otherwise false
     */
-    @Override
+    
     public boolean importBookingsData(String bookingsTxtFileName) {
         return true;
     }
@@ -46,7 +189,7 @@ public class HotelImpl implements Hotel{
     * @param  paymentsTxtFileName  the text file for all payment records
     * @return true if loading data successfully, otherwise false
     */
-    @Override
+    
     public boolean importPaymentsData(String paymentsTxtFileName) {
         return true;
     }
@@ -54,7 +197,7 @@ public class HotelImpl implements Hotel{
     /**
     * Display all room information in the current hotel
     */
-    @Override
+    
     public void displayAllRooms() {
         
     }
@@ -62,7 +205,7 @@ public class HotelImpl implements Hotel{
     /**
     * Display all guest information in the current hotel
     */
-    @Override
+    
     public void displayAllGuests() {
         
     }
@@ -70,7 +213,7 @@ public class HotelImpl implements Hotel{
     /**
     * Display all booking information in the current hotel
     */
-    @Override
+    
     public void displayAllBookings() {
         
     }
@@ -78,7 +221,7 @@ public class HotelImpl implements Hotel{
     /**
     * Display all payment information in the current hotel
     */
-    @Override
+    
     public void displayAllPayments() {
         
     }
@@ -93,7 +236,7 @@ public class HotelImpl implements Hotel{
     * @param facilities   the facilities of the room
     * @return             true if adding the room successfully, otherwise false
     */
-    @Override
+    
     public boolean addRoom(int roomNumber, RoomType roomType, double price, int capacity, String facilities) {
         return true;
     }
@@ -104,7 +247,7 @@ public class HotelImpl implements Hotel{
     * @param roomNumber   the room number
     * @return             true if removing the room successfully, otherwise false
     */
-    @Override
+    
     public boolean removeRoom(int roomNumber) {
         return true;
     }
@@ -117,7 +260,7 @@ public class HotelImpl implements Hotel{
     * @param dateJoin the date of registration
     * @return         true if adding the guest successfully, otherwise false
     */
-    @Override
+    
     public boolean addGuest(String fName, String lName, LocalDate dateJoin) {
         return true;
     }
@@ -132,7 +275,7 @@ public class HotelImpl implements Hotel{
     * @param VIPexpiryDate the expiry date of VIP membership
     * @return             true if adding the guest successfully, otherwise false
     */
-    @Override
+    
     public boolean addGuest(String fName, String lName, LocalDate dateJoin, LocalDate VIPstartDate, LocalDate VIPexpiryDate) {
         return true;
     }
@@ -143,7 +286,7 @@ public class HotelImpl implements Hotel{
     * @param guestID the guest unique ID
     * @return        true if removing the guest successfully, otherwise false
     */
-    @Override
+    
     public boolean removeGuest(int guestID) {
         return true;
     }
@@ -156,7 +299,7 @@ public class HotelImpl implements Hotel{
     * @param checkout   the check-out date
     * @return           true if the room is available for this period
     */
-    @Override
+    
     public boolean isAvailable(int roomNumber, LocalDate checkin, LocalDate checkout) {
         return true;
     }
@@ -168,14 +311,14 @@ public class HotelImpl implements Hotel{
     * @param checkout   the check-out date
     * @return           an array of available room numbers for this period
     */
-    @Override
+    
     public int[] availableRooms(RoomType roomType, LocalDate checkin, LocalDate checkout) {
         return null;     
     }
     
     /**
     * Make a booking for one room type.
-    * If more than one room avaible, choose one room randomly to book
+    * If more than one room available, choose one room randomly to book
     *
     * @param guestID    a unique guest ID
     * @param roomType   a room type
@@ -184,7 +327,7 @@ public class HotelImpl implements Hotel{
     * @return           the booked room number if the booking is successful,
     *                   otherwise, return -1
     */
-    @Override
+    
     public int bookOneRoom(int guestID, RoomType roomType, LocalDate checkin, LocalDate checkout) {
         return 1;
     }
@@ -196,7 +339,7 @@ public class HotelImpl implements Hotel{
     * @param actualCheckoutDate the actual check-out date
     * @return          true if the check-out is successful, otherwise false.
     */
-    @Override
+    
     public boolean checkOut(int bookingID, LocalDate actualCheckoutDate) {
         return true;
     }
@@ -207,7 +350,7 @@ public class HotelImpl implements Hotel{
     * @param bookingID a unique booking ID
     * @return          true if the cancellation is successful, otherwise false.
     */
-    @Override
+    
     public boolean cancelBooking(int bookingID) {
         return true;
     }
@@ -219,7 +362,7 @@ public class HotelImpl implements Hotel{
     * @param lastName  the guest last name
     * @return          an array of guest IDs who match the name
     */
-    @Override
+    
     public int[] searchGuest(String firstName, String lastName) {
         return null;
     }
@@ -231,7 +374,7 @@ public class HotelImpl implements Hotel{
     * @param guestID a unique guest ID
     *
     */
-    @Override
+    
     public void displayGuestBooking(int guestID) {
         
     }
@@ -245,7 +388,7 @@ public class HotelImpl implements Hotel{
     *
     * @param  thisDate  a given date
     */
-    @Override
+    
     public void displayBookingsOn(LocalDate thisDate) {
         
     }
@@ -260,7 +403,7 @@ public class HotelImpl implements Hotel{
     *
     * @param  thisDate  a given date
     */
-    @Override
+    
     public void displayPaymentsOn(LocalDate thisDate) {
         
     }
@@ -271,7 +414,7 @@ public class HotelImpl implements Hotel{
    * @param  roomsTxtFileName  the text file for all room records
    * @return true if saving data successfully, otherwise false
    */
-    @Override
+    
     public boolean saveRoomsData(String roomsTxtFileName) {
         return true;
     }
@@ -282,7 +425,6 @@ public class HotelImpl implements Hotel{
     * @param  guestsTxtFileName  the text file for all guest records
     * @return true if saving data successfully, otherwise false
     */
-    @Override
     public boolean saveGuestsData(String guestsTxtFileName) {
         return true;
     }
@@ -293,7 +435,6 @@ public class HotelImpl implements Hotel{
     * @param  bookingsTxtFileName  the text file for all booking records
     * @return true if saving data successfully, otherwise false
     */
-    @Override
     public boolean saveBookingsData(String bookingsTxtFileName) {
         return true;
     }
@@ -304,9 +445,13 @@ public class HotelImpl implements Hotel{
     * @param  paymentsTxtFileName  the text file for all payment records
     * @return true if saving data successfully, otherwise false
     */
-    @Override
+    
     public boolean savePaymentsData(String paymentsTxtFileName) {
         return true;
+    }
+
+    private SimpleDateFormat SimpleDateFormat(String ddMMyyyy) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }
