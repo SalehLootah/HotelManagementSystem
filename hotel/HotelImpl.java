@@ -2,6 +2,7 @@ package hotel;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Random;
@@ -21,6 +22,9 @@ public class HotelImpl implements Hotel{
     public static ArrayList<VIP>VIPGuests;
     public static final SimpleDateFormat d8 = new SimpleDateFormat("yyyy-MM-dd");
     
+        public HotelImpl(String roomsTxtFileName, String guestsTxtFileName, String bookingsTxtFileName, String paymentsTxtFileName){
+            importAllData(roomsTxtFileName, guestsTxtFileName, bookingsTxtFileName, paymentsTxtFileName);
+        }
     static class Room{
         private long roomNumber;
         private String roomType;
@@ -28,7 +32,7 @@ public class HotelImpl implements Hotel{
         private int capacity;
         private String facilities;
         
-        //Constructor Start
+        //Constructor
         public Room(long roomNumber, String roomType, double price, int capacity, String facilities){
             this.roomNumber = roomNumber;
             this.roomType = roomType;
@@ -36,7 +40,22 @@ public class HotelImpl implements Hotel{
             this.capacity = capacity;
             this.facilities = facilities;
         }
-        
+        //getter methods
+        public long getRoomNumber() {
+            return this.roomNumber;
+        }
+        public String getRoomType(){
+            return this.roomType;
+        }
+        public double getRoomPrice(){
+            return this.price;
+        }
+        public int getCapacity(){
+            return this.capacity;
+        }
+        public String getFacilities(){
+            return this.facilities;
+        }
     }
     
     static class Guest{
@@ -45,11 +64,26 @@ public class HotelImpl implements Hotel{
         private String lName;
         private Date dateJoin;
         
+        //constructor
         public Guest(long guestID,String fName,String lName,Date dateJoin){
             this.guestID = guestID;
             this.fName = fName;
             this.lName = lName;
             this.dateJoin = dateJoin;
+        }
+        
+        //getter methods
+        public long getGuestID(){
+            return this.guestID = guestID;
+        }
+        public String getFName(){
+            return this.fName = fName;
+        }
+        public String getLName(){
+            return this.lName = lName;
+        }
+        public Date getDateJoin(){
+            return this.dateJoin = dateJoin;
         }
     }
     
@@ -61,13 +95,32 @@ public class HotelImpl implements Hotel{
         private Date checkinDate;
         private Date checkoutDate;
         
-        public Booking(long id,long guestID,long roomNumber,Date bookingDate,Date checkinDate, Date checkoutDate){
+        public Booking(long id,long guestID,long roomNumber,Date bookingDate,Date checkinDate, Date checkoutDate, double totalAmount){
             this.id = id;
             this.guestID = guestID;
             this.roomNumber = roomNumber;
             this.bookingDate = bookingDate;
             this.checkinDate = checkinDate;
             this.checkoutDate = checkoutDate;
+        }
+        //getter methods
+        public long getID(){
+            return this.id = id;
+        }
+        public long getGuestID(){
+            return this.guestID = guestID;
+        }
+        public double getRoomNumber(){
+            return this.roomNumber = roomNumber;
+        }
+        public Date getBookingDate(){
+            return this.bookingDate = bookingDate;
+        }
+        public Date getCheckInDate(){
+            return this.checkinDate = checkinDate;
+        }
+        public Date getCheckOutDate(){
+            return this.checkoutDate = checkoutDate;
         }
     }
     
@@ -83,31 +136,61 @@ public class HotelImpl implements Hotel{
             this.amount = amount;
             this.payReason = payReason;
         }
+        //getter methods
+        public Date getDate(){
+            return this.date = date;
+        }
+        public long getGuestID(){
+            return this.guestID = guestID;
+        }
+        public double getAmount(){
+            return this.amount = amount;
+        }
+        public String getPayReason(){
+            return this.payReason = payReason;
+        }
     }
     
     class VIP extends Guest{
         private Date VIPStartDate;
         private Date VIPEndData;
         
+        //constructor
         public VIP(long guestID, String fName, String lName, Date dateJoin, Date VIPstartDate, Date VIPEndDate) {
             super(guestID, fName, lName, dateJoin);
             this.VIPStartDate = VIPStartDate;
             this.VIPEndData = VIPEndDate;
         }
         
+        //setter method
         public void setVIP(Date VIPStartDate, Date VIPEndDate){
             this.VIPEndData = VIPEndDate;
             this.VIPStartDate = VIPStartDate;
         }
         
+        //getter methods
         public Date getVIPStartDate(){
             return this.VIPStartDate = VIPStartDate;
         }
         public Date getVIPEndDate(){
             return this.VIPEndData = VIPEndData;
         }
-    
     }
+    
+    public boolean importAllData(String roomsTxtFileName, String guestsTxtFileName, String bookingsTxtFileName, String paymentsTxtFileName){
+        try{
+            importRoomsData(roomsTxtFileName);
+            importGuestsData(guestsTxtFileName);
+            importBookingsData(bookingsTxtFileName);
+            importPaymentsData(paymentsTxtFileName);
+            return true; // Boolean return type
+        }catch(Exception e){
+            System.out.println("ERROR: an issue occured importing data");
+            System.out.println(e); // Here is when we print the error
+            return false;
+        }
+    }
+    
     
     /**
     * Load all the room records from a text file
@@ -132,7 +215,7 @@ public class HotelImpl implements Hotel{
             return true;
         }
         catch(Exception e){
-            System.out.println("ERORR");
+            System.out.println("ERORR CANNOT READ ROOM DATA");
             return false;
         }
         
@@ -167,7 +250,8 @@ public class HotelImpl implements Hotel{
             return true;
         }
         catch(Exception e){
-            System.out.println("Error while reading guest list");
+            System.out.println("ERROR CANNOT READ GUEST DATA");
+            System.out.println(e);
             return false;
         }  
     }
@@ -180,8 +264,28 @@ public class HotelImpl implements Hotel{
     */
     
     public boolean importBookingsData(String bookingsTxtFileName) {
-        return true;
-    }
+        try{
+            File file = new File(bookingsTxtFileName);
+            BufferedReader in = new BufferedReader(new FileReader(file));
+            String st;
+            bookings = new ArrayList<Booking>();
+            while((st = in.readLine()) != null){
+                String[] bookingData = st.split(",");
+                Booking newBooking = new Booking(Long.valueOf(bookingData[0]), Long.valueOf(bookingData[1]),
+                        Long.valueOf(bookingData[2]),d8.parse(bookingData[3]), d8.parse(bookingData[4]),
+                        d8.parse(bookingData[5]), Double.valueOf(bookingData[6])); 
+                bookings.add(newBooking);
+            }
+            in.close(); 
+            return true;
+        }
+        catch(Exception e){
+            System.out.println("ERROR CANNOT READ BOOKING DATA");
+            System.out.println(e);
+            return false;
+        }
+    }   
+
     
     /**
     * Load all the payment records from a text file
@@ -190,32 +294,64 @@ public class HotelImpl implements Hotel{
     * @return true if loading data successfully, otherwise false
     */
     
-    public boolean importPaymentsData(String paymentsTxtFileName) {
-        return true;
+    public boolean importPaymentsData(String paymentsTxtFileName){
+        try{
+            File file = new File(paymentsTxtFileName);
+            BufferedReader in = new BufferedReader(new FileReader(file));
+            String st;
+            SimpleDateFormat d8 = new SimpleDateFormat ("yyyy-MM-dd");
+            payments = new ArrayList<Payment>();
+            while ((st = in.readLine()) != null){
+                String[] paymentData = st.split(",");
+                Payment newPayment = new Payment(d8.parse(paymentData[0]), Long.valueOf(paymentData[1]),
+                    Double.valueOf(paymentData[2]), paymentData[3]);
+                payments.add(newPayment);
+            }
+            in.close();
+            return true;
+        }
+        
+        catch(Exception e){
+            System.out.println("ERROR CANNOT READ PAYMENT DATA");
+            return false;
+        }
     }
     
     /**
     * Display all room information in the current hotel
     */
-    
     public void displayAllRooms() {
-        
+        System.out.println("ROOM INFORMATION: ");
+        for(Room room: rooms){
+            System.out.println("Room Number: " +room.getRoomNumber() + "  Room Type: " + room.getRoomType()
+                    + "  Room Price: " + room.getRoomPrice() + "  Room capacity: " + room.getCapacity()
+                    + "  Room Facilities: " + room.getFacilities());
+        }
     }
     
     /**
     * Display all guest information in the current hotel
     */
-    
     public void displayAllGuests() {
-        
+        System.out.println("GUEST INFORMATION: ");
+        for(Guest guest: guests){
+            System.out.println("Guest ID: " + guest.getGuestID()
+                    + "  Guest Full Name: " + guest.getFName() + " " + guest.getLName()
+                    + "  Guest Join Date: " + guest.getDateJoin());
+        }
     }
     
     /**
     * Display all booking information in the current hotel
     */
-    
     public void displayAllBookings() {
-        
+        System.out.println("BOOKING INFORMATION: ");
+        for(Booking booking: bookings){
+            System.out.println("Booking ID: " + booking.getID()
+            + "  Guest ID: " + booking.getGuestID() + "  Room Number: " +booking.getRoomNumber()
+            + "  Booking Date: " + booking.getBookingDate() + "  Check-in Date: " + booking.getCheckInDate()
+            + "  Check-out Date: " + booking.getCheckOutDate());
+        }
     }
     
     /**
@@ -223,7 +359,11 @@ public class HotelImpl implements Hotel{
     */
     
     public void displayAllPayments() {
-        
+        System.out.println("PAYMENT INFORMATION: ");
+        for(Payment payment: payments){
+            System.out.println("Payment Date: " + payment.getDate() + "  Guest ID: "+ payment.getGuestID()
+            + "  Total Amount: " + payment.getAmount() + "  Pay Reason: " + payment.getPayReason());
+        }   
     }
     
     /**
@@ -236,8 +376,15 @@ public class HotelImpl implements Hotel{
     * @param facilities   the facilities of the room
     * @return             true if adding the room successfully, otherwise false
     */
-    
-    public boolean addRoom(int roomNumber, RoomType roomType, double price, int capacity, String facilities) {
+    public boolean addRoom(int roomNumber, String roomType, double price, int capacity, String facilities){
+        //Check whether room is already in the ArrayList
+        for(Room room : rooms){
+            if (roomNumber == room.getRoomNumber()){
+                return false;
+            }
+        }
+        Room newRoom = new Room(roomNumber, roomType, price, capacity, facilities);
+        rooms.add(newRoom);
         return true;
     }
     
@@ -247,9 +394,23 @@ public class HotelImpl implements Hotel{
     * @param roomNumber   the room number
     * @return             true if removing the room successfully, otherwise false
     */
-    
     public boolean removeRoom(int roomNumber) {
-        return true;
+        Date currentDate = new Date();
+        for(Room room : rooms){
+            if(roomNumber == room.getRoomNumber() && !(bookings.contains(roomNumber))){
+                rooms.remove(room);
+                return true;
+            }
+            else{
+                for(Booking booking: bookings){
+                    if(currentDate.after(booking.getCheckOutDate()) && roomNumber == booking.getRoomNumber()){
+                            rooms.remove(room);
+                            return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
     
     /**
@@ -261,8 +422,20 @@ public class HotelImpl implements Hotel{
     * @return         true if adding the guest successfully, otherwise false
     */
     
-    public boolean addGuest(String fName, String lName, LocalDate dateJoin) {
+    public boolean addGuest(String fName, String lName, Date dateJoin) {
+        long newID;
+        boolean checkUnique;
+        newID = new Random().nextLong();
+        
+        while(true){
+            for(Guest guest: guests){
+                if(guest.getGuestID() == newID){
+                    checkUnique = false;
+                }
+            }
+        Guest guest = new Guest(newID, fName, lName, new Date());
         return true;
+        }
     }
     
     /**
@@ -276,7 +449,7 @@ public class HotelImpl implements Hotel{
     * @return             true if adding the guest successfully, otherwise false
     */
     
-    public boolean addGuest(String fName, String lName, LocalDate dateJoin, LocalDate VIPstartDate, LocalDate VIPexpiryDate) {
+    public boolean addGuest(String fName, String lName, Date dateJoin, Date VIPstartDate, Date VIPexpiryDate) {
         return true;
     }
     
@@ -300,7 +473,7 @@ public class HotelImpl implements Hotel{
     * @return           true if the room is available for this period
     */
     
-    public boolean isAvailable(int roomNumber, LocalDate checkin, LocalDate checkout) {
+    public boolean isAvailable(int roomNumber, Date checkin, Date checkout) {
         return true;
     }
     
@@ -312,7 +485,7 @@ public class HotelImpl implements Hotel{
     * @return           an array of available room numbers for this period
     */
     
-    public int[] availableRooms(RoomType roomType, LocalDate checkin, LocalDate checkout) {
+    public int[] availableRooms(RoomType roomType, Date checkin, Date checkout) {
         return null;     
     }
     
@@ -328,7 +501,7 @@ public class HotelImpl implements Hotel{
     *                   otherwise, return -1
     */
     
-    public int bookOneRoom(int guestID, RoomType roomType, LocalDate checkin, LocalDate checkout) {
+    public int bookOneRoom(int guestID, RoomType roomType, Date checkin, Date checkout) {
         return 1;
     }
     
@@ -340,7 +513,7 @@ public class HotelImpl implements Hotel{
     * @return          true if the check-out is successful, otherwise false.
     */
     
-    public boolean checkOut(int bookingID, LocalDate actualCheckoutDate) {
+    public boolean checkOut(int bookingID, Date actualCheckoutDate) {
         return true;
     }
     
@@ -389,7 +562,7 @@ public class HotelImpl implements Hotel{
     * @param  thisDate  a given date
     */
     
-    public void displayBookingsOn(LocalDate thisDate) {
+    public void displayBookingsOn(Date thisDate) {
         
     }
     
@@ -404,7 +577,7 @@ public class HotelImpl implements Hotel{
     * @param  thisDate  a given date
     */
     
-    public void displayPaymentsOn(LocalDate thisDate) {
+    public void displayPaymentsOn(Date thisDate) {
         
     }
     
@@ -448,10 +621,5 @@ public class HotelImpl implements Hotel{
     
     public boolean savePaymentsData(String paymentsTxtFileName) {
         return true;
-    }
-
-    private SimpleDateFormat SimpleDateFormat(String ddMMyyyy) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
+    }   
 }

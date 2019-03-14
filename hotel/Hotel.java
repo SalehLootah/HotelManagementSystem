@@ -1,5 +1,6 @@
 package hotel;
 import java.time.LocalDate;
+import java.util.Date;
 /**
  * An interface for all functionalities of a hotel
  * management system.
@@ -71,7 +72,7 @@ public interface Hotel{
   * @param facilities   the facilities of the room
   * @return             true if adding the room successfully, otherwise false
   */
-  public boolean addRoom(int roomNumber, RoomType roomType, double price, int capacity, String facilities);
+  public boolean addRoom(int roomNumber, String roomType, double price, int capacity, String facilities);
 
   /**
   * Remove one room from the hotel
@@ -89,7 +90,7 @@ public interface Hotel{
   * @param dateJoin the date of registration
   * @return         true if adding the guest successfully, otherwise false
   */
-  public boolean addGuest(String fName, String lName, LocalDate dateJoin);
+  public boolean addGuest(String fName, String lName, Date dateJoin);
 
   /**
   * Add one VIP guest to the hotel
@@ -101,7 +102,7 @@ public interface Hotel{
   * @param VIPexpiryDate the expiry date of VIP membership
   * @return             true if adding the guest successfully, otherwise false
   */
-  public boolean addGuest(String fName, String lName, LocalDate dateJoin, LocalDate VIPstartDate, LocalDate VIPexpiryDate);
+  public boolean addGuest(String fName, String lName, Date dateJoin, Date VIPstartDate, Date VIPexpiryDate);
 
   /**
   * Remove one guest from the hotel
@@ -119,7 +120,7 @@ public interface Hotel{
   * @param checkout   the check-out date
   * @return           true if the room is available for this period
   */
-  public boolean isAvailable(int roomNumber, LocalDate checkin, LocalDate checkout);
+  public boolean isAvailable(int roomNumber, Date checkin, Date checkout);
 
   /**
   * Search for available rooms for one room type
@@ -128,7 +129,7 @@ public interface Hotel{
   * @param checkout   the check-out date
   * @return           an array of available room numbers for this period
   */
-  public int[] availableRooms(RoomType roomType, LocalDate checkin, LocalDate checkout);
+  public int[] availableRooms(RoomType roomType, Date checkin, Date checkout);
 
   /**
   * Make a booking for one room type.
@@ -141,7 +142,7 @@ public interface Hotel{
   * @return           the booked room number if the booking is successful,
   *                   otherwise, return -1
   */
-  public int bookOneRoom(int guestID, RoomType roomType, LocalDate checkin, LocalDate checkout);
+  public int bookOneRoom(int guestID, RoomType roomType, Date checkin, Date checkout);
 
   /**
   * Check out by offering a unique booking ID.
@@ -150,7 +151,7 @@ public interface Hotel{
   * @param actualCheckoutDate the actual check-out date
   * @return          true if the check-out is successful, otherwise false.
   */
-  public boolean checkOut(int bookingID, LocalDate actualCheckoutDate);
+  public boolean checkOut(int bookingID, Date actualCheckoutDate);
 
   /**
   * Cancel a booking by offering a unique booking ID.
@@ -187,7 +188,7 @@ public interface Hotel{
    *
    * @param  thisDate  a given date
    */
-  public void displayBookingsOn(LocalDate thisDate);
+  public void displayBookingsOn(Date thisDate);
 
  /**
   * Display on the screen all the payments on a given date.
@@ -199,7 +200,7 @@ public interface Hotel{
   *
   * @param  thisDate  a given date
   */
- public void displayPaymentsOn(LocalDate thisDate);
+ public void displayPaymentsOn(Date thisDate);
 
   /**
    * Save all the room records in a text file
